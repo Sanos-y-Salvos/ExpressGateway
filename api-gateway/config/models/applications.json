@@ -1,0 +1,10 @@
+{
+  "$id": "http://express-gateway.io/models/applications.json",
+  "title": "Application",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "redirectUri": { "type": "string" }
+  },
+  "required": ["name"]
+}

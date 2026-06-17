@@ -1,0 +1,16 @@
+crypto:
+  cipherKey: supersecreto_cambiar_en_produccion
+  algorithm: aes256
+  saltRounds: 10
+
+plugins:
+  circuit-breaker:
+    package: './plugins/circuit-breaker'
+  health:                               # <--- AGREGA ESTO
+    package: './plugins/health'         # <--- Ruta a la carpeta de tu nuevo plugin
+
+db:
+  redis:
+    host: 'redis'
+    port: 6379
+    namespace: 'EG'
