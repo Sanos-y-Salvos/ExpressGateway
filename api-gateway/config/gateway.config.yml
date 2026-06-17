@@ -1,0 +1,114 @@
+http:
+  port: 8080
+admin:
+  port: 9876
+  host: localhost
+
+# 1. Definimos las rutas de entrada (Lo que escribe el frontend)
+apiEndpoints:
+  mascotas_api:
+    paths: '/api/mascotas/*'
+  localizacion_api:
+    paths: '/api/localizacion/*'
+  health_api:
+    paths: '/health'
+
+serviceEndpoints:
+  mascotas_service:
+    url: 'http://ms-mascotas:3003'
+  localizacion_service:
+    url: 'http://ms-localizacion:3004'
+
+# 2. Declaramos las políticas que vamos a usar
+policies:
+  - jwt
+  - request-transformer
+  - proxy
+  - circuit-breaker
+  - health-check
+  - rate-limit   
+  - cors         
+
+
+# 3. Creamos un "tubo" (pipeline) para cada microservicio
+pipelines:
+  
+  # --- PIPELINE PARA MASCOTAS ---
+  mascotas_pipeline:
+    apiEndpoints:
+      - mascotas_api
+    policies:
+      - cors:
+          - action:
+              origin: 'http://localhost:3000' # <-- Solo el origen del frontend
+              methods: 'GET,POST,PUT,DELETE,PATCH'
+      - rate-limit:
+          - action:
+              max: 100
+              windowMs: 900000 # <-- 15 minutos en milisegundos
+              message: 'Demasiadas peticiones desde esta IP.' # Devuelve 429 por defecto
+      - jwt:
+          - action:
+              secretOrPublicKey: 'supersecreto_cambiar_en_produccion'
+              checkCredentialExistence: false
+
+      - request-transformer:
+          - action:
+              headers:
+                add:
+                  x-user-id: req.user.id
+                  x-user-role: req.user.rol
+      - proxy:
+          - action:
+              serviceEndpoint: mascotas_service
+              stripPath: true
+      - circuit-breaker:
+          - action:
+              serviceUrl: 'http://ms-mascotas:3003'
+              maxFailures: 3          
+              resetTimeout: 30000     
+              windowDuration: 60000
+
+  # --- PIPELINE PARA LOCALIZACIÓN ---
+  localizacion_pipeline:
+    apiEndpoints:
+      - localizacion_api
+    policies:
+      - cors:
+          - action:
+              origin: 'http://localhost:3000' # <-- Solo el origen del frontend
+              methods: 'GET,POST,PUT,DELETE,PATCH'
+      - rate-limit:
+          - action:
+              max: 100
+              windowMs: 900000 # <-- 15 minutos en milisegundos
+              message: 'Demasiadas peticiones desde esta IP.' # Devuelve 429 por defecto
+      - jwt:
+          - action:
+              secretOrPublicKey: 'supersecreto_cambiar_en_produccion'
+              checkCredentialExistence: false
+
+      - request-transformer:
+          - action:
+              headers:
+                add:
+                  x-user-id: req.user.id
+                  x-user-role: req.user.rol
+      - proxy:
+          - action:
+              serviceEndpoint: localizacion_service
+              stripPath: true
+      - circuit-breaker:
+          - action:
+              serviceUrl: 'http://ms-localizacion:3004'
+              maxFailures: 3          
+              resetTimeout: 30000     
+              windowDuration: 60000
+
+  # --- PIPELINE PARA HEALTH ---
+  health_pipeline:
+      apiEndpoints:
+        - health_api
+      policies:
+        - health-check:
+            - action: {}

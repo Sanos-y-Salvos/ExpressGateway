@@ -1,0 +1,43 @@
+services:
+  # 1. Tu API Gateway (El portero de tu sistema)
+  api-gateway:
+    image: lucianobc/api-gateway:latest
+    #build: ./api-gateway
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - '8080:8080' # Tráfico del Frontend
+      - '9876:9876' # Puerto de administración interna (opcional)
+    depends_on:
+      - rabbitmq
+      - redis
+    networks:
+      - sanos-y-salvos-net
+
+  # 2. Bus de Mensajería para eventos asíncronos
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - '5672:5672'   # Puerto interno de comunicación AMQP (útil exponerlo para pruebas locales)
+      - '15672:15672' # Panel visual de administración (http://localhost:15672)
+    networks:
+      - sanos-y-salvos-net
+
+  # 3. Caché y almacenamiento rápido en memoria
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cache
+    restart: unless-stopped
+    ports:
+      - '6379:6379' # Puerto por defecto de Redis
+    networks:
+      - sanos-y-salvos-net
+
+# 4. LA RED COMPARTIDA (El corazón de la comunicación)
+networks:
+  sanos-y-salvos-net:
+    driver: bridge
+    # Este nombre exacto es el que buscan tus microservicios con "external: true"
+    name: mascotas_sanos-y-salvos-net
