@@ -6,6 +6,9 @@ admin:
 
 # 1. Definimos las rutas de entrada (Lo que escribe el frontend)
 apiEndpoints:
+  mascotas_publico:
+    paths: '/api/mascotas/reportes'
+    methods: ['GET']
   mascotas_api:
     paths: '/api/mascotas/*'
   # 1. El endpoint público (más específico)
@@ -18,6 +21,8 @@ apiEndpoints:
 serviceEndpoints:
   mascotas_service:
     url: 'http://ms-mascotas:3003'
+  mascotas_service_reportes:
+    url: 'http://ms-mascotas:3003/reportes'
   localizacion_service:
     url: 'http://ms-localizacion:3004'
 
@@ -35,6 +40,19 @@ policies:
 
 # 3. Creamos un "tubo" (pipeline) para cada microservicio
 pipelines:
+ # --- PIPELINE PÚBLICO MASCOTAS (sin JWT) ---
+  mascotas_publico_pipeline:
+    apiEndpoints:
+      - mascotas_publico
+    policies:
+      - cors:
+          - action:
+              origin: 'http://localhost:5173'
+              methods: 'GET'
+      - proxy:
+          - action:
+              serviceEndpoint: mascotas_service_reportes
+              stripPath: true
   
   # --- PIPELINE PARA MASCOTAS ---
   mascotas_pipeline:
