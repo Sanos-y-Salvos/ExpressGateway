@@ -27,12 +27,6 @@ apiEndpoints:
     paths: '/health'
 
 serviceEndpoints:
-  mascotas_service:
-    url: 'http://ms-mascotas:3003'
-  mascotas_service_reportes:
-    url: 'http://ms-mascotas:3003/reportes'
-  localizacion_service:
-    url: 'http://ms-localizacion:3004'
   bff_service:
     url: 'http://backforfrontend:3000'
 
@@ -61,9 +55,9 @@ pipelines:
               methods: 'GET'
       - proxy:
           - action:
-              serviceEndpoint: mascotas_service_reportes
-              stripPath: true
-  
+              serviceEndpoint: bff_service
+              stripPath: false
+
   # --- PIPELINE PARA MASCOTAS ---
   mascotas_pipeline:
     apiEndpoints:
@@ -71,20 +65,19 @@ pipelines:
     policies:
       - cors:
           - action:
-              origin: 'http://localhost:5173' # <-- Solo el origen del frontend
+              origin: 'http://localhost:5173'
               methods: 'GET,POST,PUT,DELETE,PATCH'
       - rate-limit:
           - action:
               max: 100
-              windowMs: 900000 # <-- 15 minutos en milisegundos
-              delayAfter: 0 # deshabilita el retardo progresivo (express-rate-limit v2 añade 1s por cada hit si no se desactiva)
+              windowMs: 900000
+              delayAfter: 0
               delayMs: 0
-              message: 'Demasiadas peticiones desde esta IP.' # Devuelve 429 por defecto
+              message: 'Demasiadas peticiones desde esta IP.'
       - jwt:
           - action:
               secretOrPublicKey: '6dcc110adf4dcde1015a418452ec8ca39780835ef83d28b13b165799a0525f264594d585080db90d09b8b9d4661507e40d67d5d2ae7673fb0b92719a18233213'
               checkCredentialExistence: false
-
       - request-transformer:
           - action:
               headers:
@@ -93,14 +86,11 @@ pipelines:
                   x-user-role: req.user.role
       - proxy:
           - action:
-              serviceEndpoint: mascotas_service
-              stripPath: true
-      - circuit-breaker:
-          - action:
-              serviceUrl: 'http://ms-mascotas:5173'
+              serviceEndpoint: bff_service
+              stripPath: false
 
   # ==========================================
-  # PIPELINE ÚNICO LOCALIZACIÓN (Solo Lectura)
+  # PIPELINE LOCALIZACIÓN (Solo Lectura)
   # ==========================================
   localizacion_pipeline:
     apiEndpoints:
@@ -108,13 +98,12 @@ pipelines:
     policies:
       - cors:
           - action:
-              origin: 'http://localhost:5173' 
-              methods: 'GET,OPTIONS' # Estrictamente solo lectura
+              origin: 'http://localhost:5173'
+              methods: 'GET,OPTIONS'
       - proxy:
           - action:
-              serviceEndpoint: localizacion_service
-              changeOrigin: true
-              stripPath: true
+              serviceEndpoint: bff_service
+              stripPath: false
 
   # ==========================================
   # PIPELINE AUTH (delega a BFF -> ms-auth)
