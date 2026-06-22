@@ -23,6 +23,8 @@ apiEndpoints:
     paths: ['/api/tickets', '/api/tickets/*']
   chatbot_api:
     paths: '/api/chatbot/*'
+  matching_api:
+    paths: ['/api/matching', '/api/matching/*']
   health_api:
     paths: '/health'
 
@@ -189,6 +191,22 @@ pipelines:
               delayAfter: 0
               delayMs: 0
               message: 'Demasiadas peticiones desde esta IP.'
+      - proxy:
+          - action:
+              serviceEndpoint: bff_service
+              stripPath: false
+
+  # ==========================================
+  # PIPELINE MATCHING (sin JWT — ms-matching no tiene auth)
+  # ==========================================
+  matching_pipeline:
+    apiEndpoints:
+      - matching_api
+    policies:
+      - cors:
+          - action:
+              origin: 'http://localhost:5173'
+              methods: 'GET,PATCH,OPTIONS'
       - proxy:
           - action:
               serviceEndpoint: bff_service
