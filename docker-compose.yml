@@ -1,8 +1,8 @@
 services:
   # 1. Tu API Gateway (El portero de tu sistema)
   api-gateway:
-    #image: lucianobc/api-gateway:latest
-    build: ./api-gateway
+    image: lucianobc/api-gateway:latest
+    # build: ./api-gateway
     container_name: api-gateway
     restart: unless-stopped
     ports:
