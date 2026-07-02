@@ -53,7 +53,7 @@ pipelines:
     policies:
       - cors:
           - action:
-              origin: 'http://localhost:5173'
+              origin: ['http://localhost:5173', 'http://localhost']
               methods: 'GET'
       - proxy:
           - action:
@@ -67,7 +67,7 @@ pipelines:
     policies:
       - cors:
           - action:
-              origin: 'http://localhost:5173'
+              origin: ['http://localhost:5173', 'http://localhost']
               methods: 'GET,POST,PUT,DELETE,PATCH'
       - rate-limit:
           - action:
@@ -100,7 +100,7 @@ pipelines:
     policies:
       - cors:
           - action:
-              origin: 'http://localhost:5173'
+              origin: ['http://localhost:5173', 'http://localhost']
               methods: 'GET,OPTIONS'
       - proxy:
           - action:
@@ -116,7 +116,7 @@ pipelines:
     policies:
       - cors:
           - action:
-              origin: 'http://localhost:5173'
+              origin: ['http://localhost:5173', 'http://localhost']
               methods: 'GET,POST,PUT,DELETE,PATCH'
       - rate-limit:
           - action:
@@ -139,7 +139,7 @@ pipelines:
     policies:
       - cors:
           - action:
-              origin: 'http://localhost:5173'
+              origin: ['http://localhost:5173', 'http://localhost']
               methods: 'GET,POST,PUT,DELETE,PATCH'
       - rate-limit:
           - action:
@@ -162,7 +162,7 @@ pipelines:
     policies:
       - cors:
           - action:
-              origin: 'http://localhost:5173'
+              origin: ['http://localhost:5173', 'http://localhost']
               methods: 'GET,POST,PUT,DELETE,PATCH'
       - rate-limit:
           - action:
@@ -182,7 +182,7 @@ pipelines:
     policies:
       - cors:
           - action:
-              origin: 'http://localhost:5173'
+              origin: ['http://localhost:5173', 'http://localhost']
               methods: 'GET,POST,PUT,DELETE,PATCH'
       - rate-limit:
           - action:
@@ -205,7 +205,7 @@ pipelines:
     policies:
       - cors:
           - action:
-              origin: 'http://localhost:5173'
+              origin: ['http://localhost:5173', 'http://localhost']
               methods: 'GET,PATCH,OPTIONS'
       - proxy:
           - action:
